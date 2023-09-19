@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, avoid_print, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Contador extends StatefulWidget {
   const Contador({super.key});
@@ -10,7 +11,27 @@ class Contador extends StatefulWidget {
 }
 
 class _ContadorState extends State<Contador> {
-  int x = 100;
+  int x = 0; // variável de estado
+
+  @override
+  void initState() {
+    super.initState();
+    obtemValor(); // lê da memória hora que abre a página
+  }
+
+  void obtemValor() async {
+    // busca um valor da memória persistente
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      x = prefs.getInt('contador') ?? 0;
+    });
+  }
+
+  void salvaValor(int valor) async {
+    // salva um valor na memória persistente
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('contador', valor);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +49,7 @@ class _ContadorState extends State<Contador> {
                 setState(() {
                   x = x + 1;
                 });
+                salvaValor(x); // manda persistir o x
               },
               child: Text("Incrementar"),
             ),
@@ -36,6 +58,7 @@ class _ContadorState extends State<Contador> {
                 setState(() {
                   x = x - 1;
                 });
+                salvaValor(x);
               },
               child: Text("Decrementar"),
             ),
